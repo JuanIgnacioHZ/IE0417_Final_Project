@@ -1,0 +1,1 @@
+Como empleado de una cadena de restaurante, Juan quiere automatizar el proceso de identificación de datos contables de los vouchers que genera, esto para tener la información ordenada y poderla descargar en un formato compatible con el software financiero de su empleador.

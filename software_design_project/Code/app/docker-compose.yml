@@ -1,0 +1,80 @@
+version: "3.3"
+
+services:
+  # Python para el front end
+  streamlit:
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile
+    container_name: streamlit
+    environment:
+      work_dir: /app
+      photo_source_dir: /img/photo_source
+      photo_processed_dir: /img/processed_photos
+      MONGO_INITDB_ROOT_USERNAME: mongo_ticoburguesas
+      MONGO_INITDB_ROOT_PASSWORD: mongondo
+      MONGO_IP_ADDR: 172.20.0.10
+    networks:
+      - backend
+    volumes:
+      - images:/img
+    ports: 
+      - "8501:8501"
+    
+  # Python para manejar el OCR y la base en el backend
+  python:
+    build:
+      context: ./OCR
+      dockerfile: Dockerfile
+    container_name: python-ocr
+    environment:
+      work_dir: /app-OCR
+      photo_source_dir: /img/photo_source
+      photo_processed_dir: /img/processed_photos
+      MONGO_INITDB_ROOT_USERNAME: mongo_ticoburguesas
+      MONGO_INITDB_ROOT_PASSWORD: mongondo
+      MONGO_IP_ADDR: 172.20.0.10
+    networks:
+      - backend
+    volumes:
+      - images:/img
+
+  # La base de datos se implementa con mongo, que trabaja
+  # a base de json, que es muy fácil de usar en python
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_ticoburguesas
+      MONGO_INITDB_ROOT_PASSWORD: mongondo
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/logs
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "27017:27017"
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  mongodbdata:
+    driver: local
+  images:
+
+# Material consultado:
+# https://kb.objectrocket.com/mongo-db/use-docker-and-python-for-a-mongodb-application-1046
+# https://stackoverflow.com/questions/70282571/pymongo-does-not-create-new-database-mongo-is-running-on-a-docker
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-flask-with-mongodb-and-docker
+

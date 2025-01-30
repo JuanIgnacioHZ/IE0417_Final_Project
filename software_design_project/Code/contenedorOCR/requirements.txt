@@ -1,0 +1,7 @@
+pymongo
+tesseract
+pillow
+pytesseract
+regex
+glob2
+watchdog
